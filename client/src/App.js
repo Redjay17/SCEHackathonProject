@@ -1,31 +1,17 @@
-import logo from './logo.svg';
 import './App.css';
+import { Component } from 'react';
 import RouterComp from './Router';
 
-function App() {
-  const dontShow = true;
+import img from './Images/2C.jpg';
 
-  return (
-    <div className="App">
-      { dontShow ? <> </> :
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <p>
-            Edit <code>src/App.js</code> and save to reload.
-          </p>
-          <a
-            className="App-link"
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Hello World!
-          </a>
-        </header>
-      }
-      <RouterComp />
-    </div>
-  );
+class App extends Component {
+  render(){
+    return (
+      <div className="App">
+        <RouterComp />
+      </div>
+    );
+  }
 }
 
 export default App;

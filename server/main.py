@@ -2,12 +2,13 @@ from flask import Flask, render_template, session, request
 from flask_cors import CORS
 from flask_socketio import SocketIO, emit, join_room, leave_room
 
+import gamestate
+
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
 
 socketio = SocketIO(app)
 socketio.init_app(app, cors_allowed_origins="*")
-
 
 # Defines
 NEW_CHAT_MESSAGE_EVENT = 'newChatMessage'

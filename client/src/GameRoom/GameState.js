@@ -4,36 +4,32 @@ import socketIOClient from "socket.io-client";
 const NEW_CHAT_MESSAGE_EVENT = "newChatMessage";
 const SOCKET_SERVER_URL = "http://localhost:4000";
 
-const useChat = (roomId) => {
-  const [messages, setMessages] = useState([]);
+const useGameState = (roomId, username) => {
+  const [gameState, setGameState] = useState(undefined);
   const socketRef = useRef();
 
   useEffect(() => {
     socketRef.current = socketIOClient(SOCKET_SERVER_URL, {
-      query: { roomId },
+      query: { roomId: roomId, username: username },
     });
 
     socketRef.current.on(NEW_CHAT_MESSAGE_EVENT, (message) => {
-      const incomingMessage = {
-        ...message,
-        ownedByCurrentUser: message.senderId === socketRef.current.id,
-      };
-      setMessages((messages) => [...messages, incomingMessage]);
+      setGameState(gameState);
     });
 
     return () => {
       socketRef.current.disconnect();
     };
-  }, [roomId]);
+  }, [roomId, username]);
 
-  const sendMessage = (messageBody) => {
+  const updateGameState = (gameAction) => {
     socketRef.current.emit(NEW_CHAT_MESSAGE_EVENT, {
-      body: messageBody,
+      body: gameAction,
       senderId: socketRef.current.id,
     });
   };
 
-  return { messages, sendMessage };
+  return { gameState, updateGameState };
 };
 
-export default useChat;
+export default useGameState;

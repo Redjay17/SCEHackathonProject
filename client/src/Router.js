@@ -3,14 +3,14 @@ import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 
 import "./index.css";
 import Home from "./Home/Home";
-import ChatRoom from "./ChatRoom/ChatRoom";
+import GameRoom from "./GameRoom/GameRoom";
 
 const RouterComp = () => {
     return (
         <Router>
           <Switch>
             <Route exact path="/" component={Home} />
-            <Route exact path="/:roomId" component={ChatRoom} />
+            <Route exact path="/:roomId" component={GameRoom} />
           </Switch>
         </Router>
       );
