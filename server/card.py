@@ -27,4 +27,3 @@ class Card:
             return "Ace"
         else:
             return self.value
-print('hello')
