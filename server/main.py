@@ -17,15 +17,19 @@ GAME_STATE_UPDATED = 'gameStateUpdated'
 CONNECT_FAILED = 'connectFailed'
 PLAYER_READY_EVENT = "playerReadyEvent"
 GAME_START_EVENT = "gameStartEvent"
+PLAYER_SKIP_EVENT = "playerSkipEvent"
+ROUND_UPDATE_EVENT = "roundUpdateEvent"
 
 rooms = { }
 
 class GameState:
     def __init__(self):
         self.num_players = 0
+        self.num_players_in_play = 4
         self.game_started = False
         self.players = {}
-        self.curr_stack = [[]]
+        self.curr_stack = []
+        self.in_round = [False, False, False, False]
         self.order = [1,2,3,4]
         self.current_turn = 1
 
@@ -58,7 +62,7 @@ class GameState:
         return all_ready
 
     def update_turn_order(self):
-        while self.player_revserse_dictionary.get(self.current_turn, -1) == -1:
+        while self.player_revserse_dictionary.get(self.current_turn, -1) == -1 or not self.in_round[self.current_turn-1]:
             self.current_turn += 1
             if self.current_turn > 4:
                 self.current_turn = 1
@@ -73,6 +77,7 @@ class GameState:
         spade_post = -1
 
         for p in self.players:
+            self.in_round[self.players[p].order-1] = True
             for i in range(13):
                 self.players[p].draw(deck)
                 if self.players[p].hand[i].value == 3 and  self.players[p].hand[i].suit == "Spades":
@@ -174,7 +179,32 @@ def handle_ready(username):
 
             print("Game is ready in lobby " + roomName)
 
+@socketio.on(PLAYER_SKIP_EVENT)
+def handle_skip(username):
+    roomName = request.args.get('roomId')
+    username = request.args.get('username')
+    gs = rooms[roomName]
 
+    gs.players[username].in_round = False
+    gs.in_round[gs.players[username].order] = False
+    gs.num_players_in_play -= 1
 
+    gs.update_turn_order()
+    if gs.num_players_in_play <= 1:
+        for p in gs.players:
+            gs.players[p].in_round = True
+            gs.in_round[gs.players[p].order-1] = True
+            gs.num_players_in_play += 1
+
+        gs.curr_stack = []
+
+    rooms[roomName] = gs
+    
+    emit(
+        ROUND_UPDATE_EVENT,
+        gs.to_json(),
+        room=roomName
+    )
+    
 if __name__ == '__main__':
     socketio.run(app, host="localhost", port="4000")

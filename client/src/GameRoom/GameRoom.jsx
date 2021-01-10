@@ -73,7 +73,8 @@ const GameRoom = (props) => {
     validPlayer,
     ready,
     readyPlayer,
-  } = useGameState(roomId, username, setHand, setIsTurn, setCurPlayer);
+    skipPlayer,
+  } = useGameState(roomId, username, setHand, setIsTurn, setCurPlayer, setStack);
 
   if (!validPlayer) {
     return <Redirect push to="/" />;
@@ -86,10 +87,8 @@ const GameRoom = (props) => {
       <h3 className="room-name">Joined as: {username}</h3>:
       <h3 className="room-name">Joined as: {username}; Current turn: {curPlayer}</h3>}
       <div className="stack-container">
-        {stack.map((items, indx) =>
-          items.map((item, indx) => (
+        {stack.map((item, indx) =>
             <img src={"/Images/" + item.filepath} alt={item.id} className="card" />
-          ))
         )}
       </div>
 
@@ -113,6 +112,16 @@ const GameRoom = (props) => {
         >
           {" "}
           Confirm Selected Cards{" "}
+        </button>
+
+        <button
+          className="button"
+          disabled={!isTurn}
+          onClick={() => {
+            skipPlayer();
+          }}
+        >
+          Skip your turn
         </button>
       </div>
 

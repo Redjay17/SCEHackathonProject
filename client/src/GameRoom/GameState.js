@@ -6,10 +6,12 @@ const GAME_STATE_UPDATED = "gameStateUpdated";
 const CONNECT_FAILED = "connectFailed";
 const PLAYER_READY_EVENT = "playerReadyEvent";
 const GAME_START_EVENT = "gameStartEvent";
+const PLAYER_SKIP_EVENT = "playerSkipEvent"
+const ROUND_UPDATE_EVENT = "roundUpdateEvent"
 
 const SOCKET_SERVER_URL = "http://localhost:4000";
 
-const useGameState = (roomId, username, setHand, setIsTurn, setCurPlayer) => {
+const useGameState = (roomId, username, setHand, setIsTurn, setCurPlayer, setStack) => {
   const [gameState, setGameState] = useState(undefined);
   const [messages, setMessages] = useState([]);
   const [validPlayer, setValidPlayer] = useState(true);
@@ -35,6 +37,7 @@ const useGameState = (roomId, username, setHand, setIsTurn, setCurPlayer) => {
     socketRef.current.on(GAME_START_EVENT, (gameState) => {
       let obj = JSON.parse(gameState)
       let curTurn = obj["current_turn"]
+      console.log(gameState);
       setGameState(obj)
       setHand(obj["players"][username]["hand"]);
       setCurPlayer(obj["player_revserse_dictionary"][curTurn])
@@ -49,8 +52,22 @@ const useGameState = (roomId, username, setHand, setIsTurn, setCurPlayer) => {
       setValidPlayer(false);
     });
 
-    socketRef.current.on(GAME_STATE_UPDATED, (newGameState) => {
-      setGameState(newGameState);
+    socketRef.current.on(GAME_STATE_UPDATED, (gameState) => {
+
+    });
+
+    socketRef.current.on(ROUND_UPDATE_EVENT, (gameState) => {
+      let obj = JSON.parse(gameState);
+      let curTurn = obj["current_turn"]
+      console.log(gameState)
+      setCurPlayer(obj["player_revserse_dictionary"][curTurn])
+      if(obj["player_revserse_dictionary"][curTurn] === username){
+        setIsTurn(true)
+      } else {
+        setIsTurn(false)
+      }
+
+      setStack(obj["curr_stack"])
     });
 
     return () => {
@@ -82,7 +99,13 @@ const useGameState = (roomId, username, setHand, setIsTurn, setCurPlayer) => {
     console.log("I am ready!");
   }
 
-  return { gameState, updateGameState, messages, sendMessage, validPlayer, ready, readyPlayer};
+  const skipPlayer = () => {
+    socketRef.current.emit(PLAYER_SKIP_EVENT, {
+      body: username
+    });
+  }
+
+  return { gameState, updateGameState, messages, sendMessage, validPlayer, ready, readyPlayer, skipPlayer};
 };
 
 export default useGameState;
