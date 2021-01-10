@@ -48,7 +48,7 @@ const CardContainer = ({cards, containerId, backgroundColor}) => {
                     provided.draggableProps.style
                   )}
                 >
-                  <img src={item.path} alt={item.content} className="card" />
+                  <img src={"/Images/" + item.filepath} alt={item.id} className="card" />
                 </div>
               )}
             </Draggable>
