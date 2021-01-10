@@ -1,0 +1,64 @@
+.chat-room-container {
+    position: fixed;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    margin: 16px;
+}
+
+.room-name {
+    margin-top: 0;
+}
+
+.hand-container {
+    flex: 1;
+    height: 100px;
+    overflow: auto;
+    border: 1px solid black;
+    border-radius: 10px 10px 0 0;
+}
+
+
+.send-message-button {
+    position: relative;
+    display: inline-block;
+    padding: .12em;
+    border-radius: 6px;
+    outline: none;
+    font-family: inherit;
+    font-size: 20px;
+    font-weight: normal;
+    line-height: 2;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+    user-select: none;
+    color: white;
+    background: #31a24c;
+    padding: 24px 12px;
+}
+
+.card {
+    height: auto;
+    width: 100px;
+}
+
+.button {
+    position: relative;
+    display: inline-block;
+    padding: .12em;
+    border-radius: 6px;
+    outline: none;
+    font-family: inherit;
+    font-size: 20px;
+    font-weight: normal;
+    line-height: 2;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+    user-select: none;
+    padding: 24px 12px;
+}
