@@ -11,7 +11,7 @@ const ROUND_UPDATE_EVENT = "roundUpdateEvent"
 
 const SOCKET_SERVER_URL = "http://localhost:4000";
 
-const useGameState = (roomId, username, setHand, setIsTurn, setCurPlayer, setStack) => {
+const useGameState = (roomId, username, setHand, setIsTurn, setCurPlayer, setStack, setField) => {
   const [gameState, setGameState] = useState(undefined);
   const [messages, setMessages] = useState([]);
   const [validPlayer, setValidPlayer] = useState(true);
@@ -53,7 +53,18 @@ const useGameState = (roomId, username, setHand, setIsTurn, setCurPlayer, setSta
     });
 
     socketRef.current.on(GAME_STATE_UPDATED, (gameState) => {
-
+      let obj = JSON.parse(gameState)
+      let curTurn = obj["current_turn"]
+      setGameState(obj)
+      setStack(obj["curr_stack"])
+      setHand(obj["players"][username]["hand"])
+      setField([])
+      
+      if(obj["player_revserse_dictionary"][curTurn] === username){
+        setIsTurn(true)
+      } else {
+        setIsTurn(false)
+      }
     });
 
     socketRef.current.on(ROUND_UPDATE_EVENT, (gameState) => {
@@ -83,11 +94,14 @@ const useGameState = (roomId, username, setHand, setIsTurn, setCurPlayer, setSta
     });
   };
 
-  const updateGameState = (gameAction) => {
+  const updateGameState = (gameAction, hand) => {
+    console.log(gameAction)
+    console.log(hand)
+
     socketRef.current.emit(GAME_STATE_UPDATED, {
-      body: gameAction,
-      senderId: socketRef.current.id,
-    });
+      newStack: gameAction,
+      newHand: hand
+    })
   };
 
   const readyPlayer = () => {

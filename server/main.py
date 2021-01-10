@@ -2,6 +2,7 @@ from flask import Flask, render_template, session, request
 from flask_cors import CORS
 from flask_socketio import SocketIO, emit, join_room, leave_room
 from json import JSONDecoder, dumps
+from threading import Thread, Lock
 
 from deck import Deck, Card
 
@@ -22,6 +23,8 @@ ROUND_UPDATE_EVENT = "roundUpdateEvent"
 
 rooms = { }
 
+mutex = Lock()
+
 class GameState:
     def __init__(self):
         self.num_players = 0
@@ -31,7 +34,7 @@ class GameState:
         self.curr_stack = []
         self.in_round = [False, False, False, False]
         self.order = [1,2,3,4]
-        self.current_turn = 1
+        self.current_turn = 4
 
     def add_player(self, username):
         no = self.order.pop()
@@ -62,10 +65,18 @@ class GameState:
         return all_ready
 
     def update_turn_order(self):
-        while self.player_revserse_dictionary.get(self.current_turn, -1) == -1 or not self.in_round[self.current_turn-1]:
+        self.current_turn += 1
+        
+        if self.current_turn > 4:
+            self.current_turn = 1
+            
+        while (self.player_revserse_dictionary[self.current_turn] != -1) and (self.current_turn < 5) and not (self.in_round[self.current_turn-1]):
             self.current_turn += 1
             if self.current_turn > 4:
                 self.current_turn = 1
+        
+        print(self.current_turn)
+
 
     def start_game(self):
         self.game_started = True
@@ -108,14 +119,12 @@ class Player:
     def __init__(self, username, order):
         self.username = username
         self.hand = []
-        self.hand_size = 0
         self.in_round = True
         self.is_ready = False
         self.order = order
 
     def draw(self, deck):
         self.hand.append(deck.drawCard())
-        self.hand_size += 1
         return self
 
 
@@ -139,15 +148,6 @@ def on_connect():
         print('Client attempted to join when room was full or had no username...')
         username = ""
 
-@socketio.on(NEW_CHAT_MESSAGE_EVENT)
-def on_message_sent(data):
-     roomName = request.args.get('roomId')
-     emit(
-        NEW_CHAT_MESSAGE_EVENT,
-        data,
-        room=roomName
-     )
-
 @socketio.on('disconnect')
 def test_disconnect():
     roomName = request.args.get('roomId')
@@ -160,6 +160,15 @@ def test_disconnect():
 
         if rooms[roomName].num_players == 0:
             rooms.pop(roomName)
+
+@socketio.on(NEW_CHAT_MESSAGE_EVENT)
+def on_message_sent(data):
+     roomName = request.args.get('roomId')
+     emit(
+        NEW_CHAT_MESSAGE_EVENT,
+        data,
+        room=roomName
+     )
 
 
 @socketio.on(PLAYER_READY_EVENT)
@@ -181,15 +190,18 @@ def handle_ready(username):
 
 @socketio.on(PLAYER_SKIP_EVENT)
 def handle_skip(username):
+    mutex.acquire()
+
     roomName = request.args.get('roomId')
     username = request.args.get('username')
     gs = rooms[roomName]
 
     gs.players[username].in_round = False
-    gs.in_round[gs.players[username].order] = False
+    gs.in_round[gs.players[username].order-1] = False
     gs.num_players_in_play -= 1
 
     gs.update_turn_order()
+
     if gs.num_players_in_play <= 1:
         for p in gs.players:
             gs.players[p].in_round = True
@@ -205,6 +217,41 @@ def handle_skip(username):
         gs.to_json(),
         room=roomName
     )
+
+    mutex.release()
+
+@socketio.on(GAME_STATE_UPDATED)
+def handle_update(newstack):
+    mutex.acquire()
+
+    roomName = request.args.get('roomId')
+    gs = rooms[roomName]
+
+    gs.curr_stack = newstack["newStack"]
+    gs.players[gs.player_revserse_dictionary[gs.current_turn]].hand = newstack["newHand"]
+    gs.update_turn_order()
+
+    for p in gs.players:
+        if len(gs.players[p].hand) == 0:
+            gs.game_started=False
+            for p in gs.players:
+                gs.players[p].hand = []
+            
+            for i in range(4):
+                gs.in_round[i] =  False
+
+            gs.current_turn = -1
+
+    rooms[roomName] = gs
+
+    emit(
+        GAME_STATE_UPDATED,
+        gs.to_json(),
+        room=roomName
+    )
+
+    mutex.release()
+
     
 if __name__ == '__main__':
     socketio.run(app, host="localhost", port="4000")

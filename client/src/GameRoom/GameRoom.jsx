@@ -7,23 +7,19 @@ import PlayerField from "../Components/PlayerField";
 
 import "./GameRoom.css";
 
-const handleCardsPlayed = (field, stack, updateGameState) => {
-  const currentCardSize = stack[stack.length - 1];
-
+const handleCardsPlayed = (field, stack, currHand, updateGameState) => {
   // Instant win conditions
 
   // Standard checking
-  if (field.length !== currentCardSize) {
+  if (stack.length > 0 
+    && field.length !== stack.length) 
+  {
     return;
   }
 
   // If everything is good, update game state
 
-  const gameAction = {
-    newStack: field,
-  };
-
-  updateGameState(gameAction);
+  updateGameState(field, currHand);
 };
 
 const nullState = {
@@ -37,33 +33,7 @@ const GameRoom = (props) => {
   const [field, setField] = React.useState([]);
   const [isTurn, setIsTurn] = React.useState(false);
   const [curPlayer, setCurPlayer] = React.useState("n/a");
-  const [stack, setStack] = React.useState([
-    {
-      filepath: "2D.jpg",
-      suit: "Diamonds",
-      value: 2,
-    },
-    {
-      filepath: "KH.jpg",
-      suit: "Hearts",
-      value: 13,
-    },
-    {
-      filepath: "JC.jpg",
-      suit: "Clubs",
-      value: 11,
-    },
-    {
-      filepath: "4S.jpg",
-      suit: "Spades",
-      value: 4,
-    },
-    {
-      filepath: "7D.jpg",
-      suit: "Diamonds",
-      value: 7,
-    },
-  ]);
+  const [stack, setStack] = React.useState([]);
   const [newGameAction, setNewGameAction] = React.useState(undefined);
   const {
     gameState,
@@ -74,7 +44,7 @@ const GameRoom = (props) => {
     ready,
     readyPlayer,
     skipPlayer,
-  } = useGameState(roomId, username, setHand, setIsTurn, setCurPlayer, setStack);
+  } = useGameState(roomId, username, setHand, setIsTurn, setCurPlayer, setStack, setField);
 
   if (!validPlayer) {
     return <Redirect push to="/" />;
@@ -107,7 +77,7 @@ const GameRoom = (props) => {
           className="button"
           disabled={field.length === 0}
           onClick={() => {
-            handleCardsPlayed(field, stack);
+            handleCardsPlayed(field, stack, hand, updateGameState);
           }}
         >
           {" "}
