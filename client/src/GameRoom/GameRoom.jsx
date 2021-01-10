@@ -32,37 +32,37 @@ const nullState = {
 };
 
 const GameRoom = (props) => {
-  const { roomId, username } =
-    props.location.state !== undefined ? props.location.state : nullState;
+  const { roomId, username } = props.location.state !== undefined ? props.location.state : nullState;
   const [hand, setHand] = React.useState([]);
   const [field, setField] = React.useState([]);
-  const [stack, setStack] = React.useState([[
-      {
-        filepath: "2D.jpg",
-        suit: "Diamonds",
-        value: 2,
-      },
-      {
-        filepath: "KH.jpg",
-        suit: "Hearts",
-        value: 13,
-      },
-      {
-        filepath: "JC.jpg",
-        suit: "Clubs",
-        value: 11,
-      },
-      {
-        filepath: "4S.jpg",
-        suit: "Spades",
-        value: 4,
-      },
-      {
-        filepath: "7D.jpg",
-        suit: "Diamonds",
-        value: 7,
-      },
-    ],
+  const [isTurn, setIsTurn] = React.useState(false);
+  const [curPlayer, setCurPlayer] = React.useState("n/a");
+  const [stack, setStack] = React.useState([
+    {
+      filepath: "2D.jpg",
+      suit: "Diamonds",
+      value: 2,
+    },
+    {
+      filepath: "KH.jpg",
+      suit: "Hearts",
+      value: 13,
+    },
+    {
+      filepath: "JC.jpg",
+      suit: "Clubs",
+      value: 11,
+    },
+    {
+      filepath: "4S.jpg",
+      suit: "Spades",
+      value: 4,
+    },
+    {
+      filepath: "7D.jpg",
+      suit: "Diamonds",
+      value: 7,
+    },
   ]);
   const [newGameAction, setNewGameAction] = React.useState(undefined);
   const {
@@ -73,7 +73,7 @@ const GameRoom = (props) => {
     validPlayer,
     ready,
     readyPlayer,
-  } = useGameState(roomId, username, setHand);
+  } = useGameState(roomId, username, setHand, setIsTurn, setCurPlayer);
 
   if (!validPlayer) {
     return <Redirect push to="/" />;
@@ -82,8 +82,9 @@ const GameRoom = (props) => {
   return (
     <div className="chat-room-container">
       <h1 className="room-name">Room: {roomId}</h1>
-      <h3 className="room-name">Joined as: {username}</h3>
-
+      {gameState === undefined?  
+      <h3 className="room-name">Joined as: {username}</h3>:
+      <h3 className="room-name">Joined as: {username}; Current turn: {curPlayer}</h3>}
       <div className="stack-container">
         {stack.map((items, indx) =>
           items.map((item, indx) => (
@@ -120,6 +121,7 @@ const GameRoom = (props) => {
         field={field}
         setHand={setHand}
         setField={setField}
+        canPlay={isTurn}
       />
       <ChatRoom
         roomId={roomId}

@@ -29,7 +29,7 @@ const move = (source, destination, droppableSource, droppableDestination) => {
   return result;
 };
 
-function PlayerField({hand, field, setHand, setField}) {
+function PlayerField({hand, field, setHand, setField, canPlay}) {
     
   function onDragEnd(result) {
     const { source, destination } = result;
@@ -62,7 +62,7 @@ function PlayerField({hand, field, setHand, setField}) {
         );
         
        setCards(newCards);
-    } else {
+    } else if (canPlay) {
         const result = move(
             cards,
             toCards,
@@ -77,8 +77,8 @@ function PlayerField({hand, field, setHand, setField}) {
 
   return (
     <DragDropContext onDragEnd={onDragEnd}>
-        <CardContainer cards={field} containerId="Field" backgroundColor="lightblue"/>
-        <CardContainer cards={hand} containerId="Hand" backgroundColor="lightgray"/>
+        <CardContainer cards={field} containerId="Field" backgroundColor={canPlay? "lightblue": "crimson"} canPlay={canPlay}/>
+        <CardContainer cards={hand} containerId="Hand" backgroundColor="lightgray" canPlay/>
     </DragDropContext>
   );
 }

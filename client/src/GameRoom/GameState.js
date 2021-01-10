@@ -9,7 +9,7 @@ const GAME_START_EVENT = "gameStartEvent";
 
 const SOCKET_SERVER_URL = "http://localhost:4000";
 
-const useGameState = (roomId, username, setHand) => {
+const useGameState = (roomId, username, setHand, setIsTurn, setCurPlayer) => {
   const [gameState, setGameState] = useState(undefined);
   const [messages, setMessages] = useState([]);
   const [validPlayer, setValidPlayer] = useState(true);
@@ -34,8 +34,15 @@ const useGameState = (roomId, username, setHand) => {
 
     socketRef.current.on(GAME_START_EVENT, (gameState) => {
       let obj = JSON.parse(gameState)
+      let curTurn = obj["current_turn"]
       setGameState(obj)
       setHand(obj["players"][username]["hand"]);
+      setCurPlayer(obj["player_revserse_dictionary"][curTurn])
+      if(obj["player_revserse_dictionary"][curTurn] === username){
+        setIsTurn(true)
+      } else {
+        setIsTurn(false)
+      }
     });
 
     socketRef.current.on(CONNECT_FAILED, () => {

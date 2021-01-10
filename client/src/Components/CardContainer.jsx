@@ -27,9 +27,9 @@ const getListStyle = (isDraggingOver, backgroundColor) => ({
   height: "auto",
 });
 
-const CardContainer = ({cards, containerId, backgroundColor}) => {
+const CardContainer = ({cards, containerId, backgroundColor, canPlay}) => {
   return (
-    <Droppable droppableId={containerId} direction="horizontal">
+    <Droppable droppableId={containerId} direction="horizontal" isDropDisabled={!canPlay}>
       {(provided, snapshot) => (
         <div
           ref={provided.innerRef}
