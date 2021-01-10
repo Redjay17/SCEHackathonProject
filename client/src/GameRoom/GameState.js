@@ -20,6 +20,9 @@ const useGameState = (roomId, username) => {
         ...message,
         ownedByCurrentUser: message.senderId === socketRef.current.id,
       };
+
+      console.log(incomingMessage);
+
       setMessages((messages) => [...messages, incomingMessage]);
     });
 
@@ -33,14 +36,15 @@ const useGameState = (roomId, username) => {
   }, [roomId, username]);
 
   const sendMessage = (messageBody) => {
-    socketRef.current.emit(GAME_STATE_UPDATED, {
+    console.log(messageBody);
+    socketRef.current.emit(NEW_CHAT_MESSAGE_EVENT, {
       body: messageBody,
       senderId: socketRef.current.id,
     });
   };
 
   const updateGameState = (gameAction) => {
-    socketRef.current.emit(NEW_CHAT_MESSAGE_EVENT, {
+    socketRef.current.emit(GAME_STATE_UPDATED, {
       body: gameAction,
       senderId: socketRef.current.id,
     });

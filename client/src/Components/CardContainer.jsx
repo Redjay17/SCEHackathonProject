@@ -23,7 +23,8 @@ const getListStyle = (isDraggingOver, backgroundColor) => ({
   background: isDraggingOver ? "lightgreen" : backgroundColor,
   display: "flex",
   padding: grid,
-  overflow: "auto",
+  min_eight: "100px",
+  height: "auto",
 });
 
 const CardContainer = ({cards, containerId, backgroundColor}) => {

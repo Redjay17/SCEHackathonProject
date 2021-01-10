@@ -1,8 +1,19 @@
 import React from "react";
+import useGameState from "./GameState";
+import ChatRoom from "../ChatRoom/ChatRoom";
+import PlayerField from "../Components/PlayerField";
 
 import "./GameRoom.css";
-import useGameState from "./GameState";
-import PlayerField from "./PlayerField";
+
+const handleCardsPlayed = (field, stack, updateGameState) =>{
+  const currentCardSize = stack[stack.length-1];
+
+  if(field.length !== currentCardSize){
+    return;
+  }
+
+
+}
 
 const GameRoom = (props) => {
   const { roomId, username } = props.location.state;
@@ -12,7 +23,6 @@ const GameRoom = (props) => {
   const [ stack, setStack ] = React.useState([[]]);
   const [ newGameAction, setNewGameAction ] = React.useState(undefined);
   const { gameState, updateGameState, messages, sendMessage } = useGameState(roomId, username);
-
 
   return (
     <div className="chat-room-container">
@@ -45,10 +55,11 @@ const GameRoom = (props) => {
           Send
         </button>
 
-        <button className="button" disabled={field.length === 0} onClick={()=>{console.log("CURRENT FIELD SIZE - " + field.length)}}> Confirm Selected Cards </button>
+        <button className="button" disabled={field.length === 0} onClick={()=>{handleCardsPlayed(field, stack)}}> Confirm Selected Cards </button>
       </div>
 
       <PlayerField hand={hand} field={field} setHand={setHand} setField={setField} />
+      <ChatRoom roomId={roomId} messages={messages} sendMessage={sendMessage} updateGameState={updateGameState} />
     </div>
   );
 };
