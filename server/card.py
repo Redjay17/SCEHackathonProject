@@ -21,9 +21,12 @@ class Card:
         else:
             return self.value
 
+# Translates the suit values into suit cards
+
 # shows current card
     def show(self):
         print("{} of {}".format(self.getVal(), self.suit))
+
 
 
 # Class containing deck information
@@ -35,7 +38,7 @@ class Deck:
 
 # Function that builds the deck: it generates a two dimensional list with the first row being suit values and second row being face and number values
     def build(self):
-        for suit in ['Spades','Clubs','Diamonds','Hearts']:
+        for suit in [0,1,2,3]:
             for value in range(1,14):
                 self.cards.append(Card(suit, value))
 
@@ -63,7 +66,8 @@ class Player:
 
 # Takes in single deck object and pops top card to add to hand
     def draw(self, deck):
-        self.hand.append(deck.drawCard())
+        card = deck.drawCard()
+        self.hand.append(card)
         return self
 
 # Show all the cards in the current player hand
@@ -71,21 +75,15 @@ class Player:
         for card in self.hand:
             card.show()
 
+# 
+    def GameOver(self):
+        if len(self.hand)==0:
+            print('Player {} has won'.format(self.name))
+            return True
+        return False
 
-class GameState:
-    def __init__(self):
-        self.deck = build_deck()
-        deck.shuffle()
+# Organize cards in the hand
+    def organizeHand(self):
+        self.hand = sorted(self.hand)
+        self.showHand()
 
-    
-
-
-# Testing Section
-deck = Deck()
-deck.shuffle()
-P1 = Player("austin")
-
-for i in range(5):
-    P1.draw(deck)
-
-P1.showHand()
